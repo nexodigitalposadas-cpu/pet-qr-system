@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
@@ -8,18 +9,13 @@ const supabase = createClient(
 );
 
 export default function PetProfile() {
+  const params = useParams();
+  const id = params?.id;
   const [pet, setPet] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Extrae el ID de la URL (ej: /?id=uuid o si usas parámetros)
-    const params = new URLSearchParams(window.location.search);
-    const id = params.get('id') || window.location.pathname.split('/').pop();
-
-    if (!id || id === '') {
-      setLoading(false);
-      return;
-    }
+    if (!id) return;
 
     async function fetchPet() {
       try {
@@ -42,21 +38,14 @@ export default function PetProfile() {
     }
 
     fetchPet();
-  }, []);
+  }, [id]);
 
   if (loading) {
     return <div className="p-8 text-center text-gray-600">Cargando tarjeta de la mascota...</div>;
   }
 
   if (!pet) {
-    return (
-      <main className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
-        <div className="bg-white shadow-lg rounded-2xl p-6 max-w-md w-full text-center">
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">Sistema QR de Mascotas 🐾</h1>
-          <p className="text-gray-600">Escanea el código QR de una mascota para ver su información de contacto.</p>
-        </div>
-      </main>
-    );
+    return <div className="p-8 text-center text-red-500">No se encontró ninguna mascota con este ID.</div>;
   }
 
   return (
